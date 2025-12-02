@@ -108,6 +108,7 @@ class Beam:
             screen.blit(self.img, self.rct)    
 
 
+# 爆弾クラス:
 class Bomb:
     """
     爆弾に関するクラス
@@ -139,6 +140,21 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
+# スコアクラス:
+class Score:
+    """
+    スコアに関するクラス
+    """
+    def __init__(self, xy: tuple[int, int]):
+        self.score = 0
+        self.fonto = pg.font.SysFont("None", 30)
+        self.img = self.fonto.render("Score:", 0, (0, 0, 255))
+
+    def update(self, screen: pg.Surface):
+        self.img = self.fonto.render(f"Score: {self.score}", 0, (0, 0, 255))
+        screen.blit(self.img, (100, HEIGHT - 50))
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -147,6 +163,7 @@ def main():
     # bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     beam = None  # ゲーム初期化時にはビームは存在しない
+    score = Score((100,50))  # スコアクラスのインスタンス生成
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -164,6 +181,8 @@ def main():
                     # ビームが爆弾に当たったらビームと爆弾を消す
                     bombs.pop(b)
                     beam = None
+                    score.score += 1  # スコアを1点加算
+                    score.update(screen)  # スコア表示を更新   
                     bird.change_img(6, screen)  # ビーム発射画像に切り替え
                     pg.display.update()
                     continue  # 爆弾を消したので次の爆弾へ
@@ -181,20 +200,23 @@ def main():
 
         key_lst = pg.key.get_pressed()
 
-        if beam is not None and bomb is not None:
-            if beam.rct.colliderect(bomb.rct):
-                # ビームが爆弾に当たったらビームと爆弾を消す
-                bomb = None
-                beam = None
-                bird.change_img(6, screen)  # ビーム発射画像に切り替え
-                pg.display.update()
+        # if beam is not None and bomb is not None:
+        #     if beam.rct.colliderect(bomb.rct):
+        #         # ビームが爆弾に当たったらビームと爆弾を消す
+        #         bomb = None
+        #         beam = None
+        #         bird.change_img(6, screen)  # ビーム発射画像に切り替え
+        #         pg.display.update()
 
         bird.update(key_lst, screen)
         if beam is not None:
             beam.update(screen)
 
-        if bomb is not None:  
-            bomb.update(screen)
+        for bomb in bombs:
+            if bomb is not None:  
+                bomb.update(screen)
+        
+        score.update(screen)  # スコア表示を更新
         pg.display.update()
         tmr += 1
         clock.tick(50)
