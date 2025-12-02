@@ -157,19 +157,19 @@ class Score:
 
 class Explosion:
     """
-    爆発エフェクトに関するクラス
+    爆発に関するクラス
     """
     def __init__(self, xy: tuple[int, int]):
-        self.img = pg.image.load("fig/explosion1.png")  # 爆発画像1
-        self.img2 = pg.transform.flip(self.img, False, False)  # 爆発画像2
-        self.rct = self.img.get_rect()
+        self.img = pg.image.load("fig/explosion.gif")  # 爆発画像のSurface
+        self.img2 = pg.transform.flip(self.img, True, True)  # 上下左右反転した爆発画像のSurface
+        self.imgs = [self.img, self.img2]  # 爆発アニメーション用の画像リスト
+        self.rct = self.imgs[0].get_rect()
         self.rct.center = xy
-        self.life = 4  # 爆発時間
+        self.life = 18  # 爆発時間
 
     def update(self, screen: pg.Surface):
-        if self.frame < len(self.img):
-            screen.blit(self.img[self.frame], self.rct)
-            self.life -= 1  # 爆発時間を減少
+        screen.blit(self.imgs[self.life % 2], self.rct)
+        self.life -= 1
 
 
 def main():
@@ -181,6 +181,7 @@ def main():
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     beam = None  # ゲーム初期化時にはビームは存在しない
     multibeam = []
+    explosions = []
     score = Score((100,50))  # スコアクラスのインスタンス生成
     clock = pg.time.Clock()
     tmr = 0
@@ -201,6 +202,8 @@ def main():
                         # ビームが爆弾に当たったらビームと爆弾を消す
                         bombs.pop(b)
                         multibeam[multibeam.index(beam)] = None
+                        explosion = Explosion(bomb.rct.center)
+                        explosions.append(explosion)
                         score.score += 1  # スコアを1点加算
                         score.update(screen)  # スコア表示を更新   
                         bird.change_img(6, screen)  # ビーム発射画像に切り替え
@@ -239,6 +242,12 @@ def main():
         for bomb in bombs:
             if bomb is not None:  
                 bomb.update(screen)
+
+        for explosion in explosions:
+            if explosion.life > 0:
+                explosion.update(screen)
+            else:
+                explosions.remove(explosion)  # 爆発アニメーション終了後にリストから削除
         
         score.update(screen)  # スコア表示を更新
         pg.display.update()
