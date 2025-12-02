@@ -170,6 +170,8 @@ def main():
                 # ビームが爆弾に当たったらビームと爆弾を消す
                 bomb = None
                 beam = None
+                bird.change_img(6, screen)  # ビーム発射画像に切り替え
+                pg.display.update()
 
         bird.update(key_lst, screen)
         if beam is not None:
