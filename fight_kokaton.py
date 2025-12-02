@@ -155,6 +155,23 @@ class Score:
         screen.blit(self.img, (100, HEIGHT - 50))
 
 
+class Explosion:
+    """
+    爆発エフェクトに関するクラス
+    """
+    def __init__(self, xy: tuple[int, int]):
+        self.img = pg.image.load("fig/explosion1.png")  # 爆発画像1
+        self.img2 = pg.transform.flip(self.img, False, False)  # 爆発画像2
+        self.rct = self.img.get_rect()
+        self.rct.center = xy
+        self.life = 4  # 爆発時間
+
+    def update(self, screen: pg.Surface):
+        if self.frame < len(self.img):
+            screen.blit(self.img[self.frame], self.rct)
+            self.life -= 1  # 爆発時間を減少
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -183,7 +200,7 @@ def main():
                     if beam.rct.colliderect(bomb.rct):
                         # ビームが爆弾に当たったらビームと爆弾を消す
                         bombs.pop(b)
-                        beam = None
+                        multibeam[multibeam.index(beam)] = None
                         score.score += 1  # スコアを1点加算
                         score.update(screen)  # スコア表示を更新   
                         bird.change_img(6, screen)  # ビーム発射画像に切り替え
@@ -209,9 +226,10 @@ def main():
         #         bomb = None
         #         beam = None
         #         bird.change_img(6, screen)  # ビーム発射画像に切り替え
-        #         pg.display.update()
+        #         p g.display.update()
 
         bird.update(key_lst, screen)
+
         for beam in multibeam:
             if beam is not None:
                 beam.update(screen)
